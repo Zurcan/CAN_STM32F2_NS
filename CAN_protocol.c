@@ -15,12 +15,12 @@ int var2ArrConverter(char * inpArr, int arrSize, char* outArr)
 	return 0;
 }
 
-void prepareSTDID(char mestype, char mtype, char ttype, char priority)
+void prepareSTDID(char mestype, char ptype)
 {
+	STDID.reserved02 = 3;
+	STDID.packetType = ptype;
 	STDID.messageType = mestype;
-	STDID.moduleType = mtype;
-	STDID.transmitionType = ttype;
-	STDID.priorityLevel = priority;
+	STDID.reserved910 = 3;
 	STDID.unused = 0;
 }
 
@@ -38,12 +38,14 @@ void prepareEXTID(short serial, char msgtype,char devtype,char priority, char ms
 
 void setTxDataMessage(IIMmoduleType module)
 {
-	uint32_t *eid;
+	uint32_t *eid,*stdid;
 	eid  = (uint32_t *)EXTID;
+	stdid = (uint32_t *)&STDID;
 	TxMessage.ExtId = *eid;
-	TxMessage.StdId = 0;
+	TxMessage.StdId = *stdid;
 	TxMessage.RTR = CAN_RTR_DATA;
-	TxMessage.IDE = CAN_ID_EXT;
+//	TxMessage.IDE = CAN_ID_EXT;
+	TxMessage.IDE = CAN_ID_STD;
 	TxMessage.DLC = 8;
 	if(module == MDLU)
 	{
@@ -54,7 +56,8 @@ void setTxDataMessage(IIMmoduleType module)
 		TxMessage.Data[4] = (char)MDLUTransmitData.LAz;
 		TxMessage.Data[5] = (char)(MDLUTransmitData.LAz>>8);
 		TxMessage.Data[6] = MDLUTransmitData.service;
-		TxMessage.Data[7] = MDLUTransmitData.CSL;				//constant for a some time
+		TxMessage.Data[7] = 0;				//constant for a some time
+
 	}
 	if(module == MDUS)
 	{
@@ -65,7 +68,7 @@ void setTxDataMessage(IIMmoduleType module)
 		TxMessage.Data[4] = (char)MDUSTransmitData.ARz;
 		TxMessage.Data[5] = (char)(MDUSTransmitData.ARz>>8);
 		TxMessage.Data[6] = MDUSTransmitData.service;
-		TxMessage.Data[7] = MDUSTransmitData.CSL;				//constant for a some time
+		TxMessage.Data[7] = 0;				//constant for a some time
 	}
 	if(module == MDAD)
 	{
@@ -76,7 +79,8 @@ void setTxDataMessage(IIMmoduleType module)
 		TxMessage.Data[4] = (char)(MDADTransmitData.temperature>>8);
 		TxMessage.Data[5] = (char)(MDADTransmitData.temperature>>16);
 		TxMessage.Data[6] = MDADTransmitData.service;
-		TxMessage.Data[7] = MDADTransmitData.CSL;				//constant for a some time
+		TxMessage.Data[7] = 0;				//constant for a some time
+
 	}
 	if(module == SatteliteModule)
 	{
@@ -90,6 +94,7 @@ void setTxDataMessage(IIMmoduleType module)
 		TxMessage.Data[6] = arrCANdata[6];
 		TxMessage.Data[7] = arrCANdata[7];
 	}
+	TxMessage.Data[7] = calcCSofArr(TxMessage.Data,8);
 
 }
 

@@ -34,10 +34,10 @@ typedef struct
 typedef struct
 {
 
-	unsigned messageType:3;			//ID0-ID2
-	unsigned moduleType:4;			//ID3-ID6  module type inertial 0001, sattelite 0010, interface module 0011, radio modem 0100, UHF 0101
-	unsigned transmitionType:2;		//ID7-ID8  0 - single packet; 3 - 1st packet, has packet amount; 2 - CS of all packets, last frame; 1 - not 1s nor last packet, has number of packet;
-	unsigned priorityLevel:2;		//ID9-ID10
+	unsigned reserved02:3;			//ID0-ID2 - reserved 011
+	unsigned packetType:4;			//ID3-ID6  module type inertial 0001, sattelite 0010, interface module 0011, radio modem 0100, UHF 0101
+	unsigned messageType:2;		//ID7-ID8  0 - single packet; 3 - 1st packet, has packet amount; 2 - CS of all packets, last frame; 1 - not 1s nor last packet, has number of packet;
+	unsigned reserved910:2;		    //ID9-ID10 - reserved 11
 	unsigned unused:21;
 
 } standardID;
@@ -72,7 +72,19 @@ typedef struct
 
 }configIIM;
 
+typedef enum {
+	INScoords = 1,
+	SNScoords = 2,
+	IIMdata = 4,
+	KLNcoords = 5
+}CANpackets;
 
+typedef enum{
+	SingleMessage = 0,
+	MultyMessageMiddle = 1,
+	MultyMessageLast = 2,
+	MultyMessageFirst = 3
+}MessageTypes;
 typedef enum {
 				BasicModule = 0,
 				MDLU=0x01,
@@ -109,11 +121,13 @@ MDADdataType MDADdata;
 MDLUdataType MDLUTransmitData;
 MDUSdataType MDUSTransmitData;
 MDADdataType MDADTransmitData;
+MessageTypes mTypes;
+CANpackets pTypes;
 CanTxMsgTypeDef TxMessage;
 CanTxMsgTypeDef framedMessagesArr[86];
 configIIM IIMConf;
 
 void prepareEXTID(short serial, char msgtype,char devtype,char priority, char msgMode);
-void prepareSTDID( char mestype, char mtype, char ttype, char priority);
+void prepareSTDID(char mestype, char ptype);
 int var2ArrConverter(char * inpArr, int arrSize, char* outArr);
 uint8_t calcCSofArr(uint8_t *arr, uint8_t arrSize);
