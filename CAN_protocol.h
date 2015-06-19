@@ -125,6 +125,7 @@ MessageTypes mTypes;
 CANpackets pTypes;
 CanTxMsgTypeDef TxMessage;
 CanTxMsgTypeDef framedMessagesArr[86];
+CanRxMsgTypeDef RxMessage;
 configIIM IIMConf;
 
 void prepareEXTID(short serial, char msgtype,char devtype,char priority, char msgMode);
