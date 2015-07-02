@@ -72,10 +72,52 @@ typedef struct
 
 }configIIM;
 
+typedef struct
+{
+	float XSAT;
+	float YSAT;
+	float ZSAT;
+	float LattitudeB;//rads
+	float LongtitudeL;//rads
+	float AltitudeH;//meters
+}SNSCoordMessage;
+
+typedef struct
+{
+	float XIN;
+	float YIN;
+	float ZIN;
+	float xDIS;//axial displacement by x;
+	float yDIS;//axial displacement by y;
+	float zDIS;//axial displacement by z;
+	float aX;  //acceleration by x;
+	float aY;  //acceleration by y;
+	float aZ;  //acceleration by z;
+	float wX;  //angle speed by x;
+	float wY;  //angle speed by y;
+	float wZ;  //angle speed by z;
+	float angleX;
+	float angleY;
+	float angleZ;
+}INSCoordMessage;
+
+typedef struct
+{
+	float XKLN;
+	float YKLN;
+	float ZKLN;
+	float xShift;
+	float yShift;
+	float zShift;
+	float dist;
+	float azimuth;
+}KLNCoordMessage;
+
 typedef enum {
 	INScoords = 1,
 	SNScoords = 2,
-	IIMdata = 4,
+	reserved1 = 3,
+	reserved2 = 4,
 	KLNcoords = 5
 }CANpackets;
 
@@ -94,7 +136,7 @@ typedef enum {
 				SatteliteModule = 5,
 				NetworkModule = 6,
 				RadioModem = 7
-			  }IIMmoduleType;
+			  }ModuleType;
 typedef enum {
 				Command=0x00,
 				Answer = 0x5,
@@ -111,7 +153,8 @@ typedef enum {
 			 }IIMInstructionCode;
 
 
-IIMmoduleType IIMTyp, IIMTransmitType;
+
+ModuleType IIMTyp, IIMTransmitType;
 IIMInstructionCode IIMinstr;
 extendedID *EXTID;
 standardID STDID;
@@ -127,8 +170,15 @@ CanTxMsgTypeDef TxMessage;
 CanTxMsgTypeDef framedMessagesArr[86];
 CanRxMsgTypeDef RxMessage;
 configIIM IIMConf;
+uint8_t module;
+//INSCoordMessage insdata;
 
+int getArraySize(uint8_t *inpArr,int arrSize);
+void setTxDataMessage(ModuleType module, uint8_t* inpArr);
 void prepareEXTID(short serial, char msgtype,char devtype,char priority, char msgMode);
 void prepareSTDID(char mestype, char ptype);
 int var2ArrConverter(char * inpArr, int arrSize, char* outArr);
+int struct2ArrConverter(uint8_t *inpArr, int arrSize, uint8_t *outArr);
+int protocolMessageProcessor(uint8_t *inpArr, int arrSize, uint8_t *outArr);
+int mesQueueProcedure(uint8_t *inpArr, int mesPointer, uint8_t *message, int arrLength);
 uint8_t calcCSofArr(uint8_t *arr, uint8_t arrSize);
