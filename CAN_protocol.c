@@ -1,7 +1,57 @@
 /*This is CAN_protocoooooool!
  *
  */
+/*here is an example of use this libraries in cycle with eternal loop on transmit
+ * int size = 0;
+    uint8_t INSstructArr[72];
+	volatile uint8_t messg[8];
+	volatile int cntr=0;
+ * INSCoordMessage insdata;
+ *   module = INScoords;
+ *   size = getArraySize((uint8_t*)&insdata,sizeof(INSCoordMessage));
+  insdata.XIN = 0;
+  insdata.YIN = 1;
+  insdata.ZIN = 2;
+  insdata.aX = 3;
+  insdata.aY = 4;
+  insdata.aZ = 5;
+  insdata.angleX = 6;
+  insdata.angleY = 7;
+  insdata.angleZ = 8;
+  insdata.wX = 9;
+  insdata.wY = 10;
+  insdata.wZ = 11;
+  insdata.xDIS = 12;
+  insdata.yDIS = 13;
+  insdata.zDIS = 14;
+ *   while (1)
+  {
+	  protocolMessageProcessor((uint8_t*)&insdata,sizeof(INSCoordMessage),INSstructArr);
+	  volatile int m;
+	  for(int i = 0; i < size/8; i++ )
+	  {
 
+		  cntr = mesQueueProcedure(INSstructArr,cntr,messg,size);
+		  if(i==0)
+			  m=3;
+		  else if(i==size/8-1)
+			 m=2;
+		  else
+			 m=1;
+		  prepareSTDID(m,module);
+		  setTxDataMessage(module,messg);
+		  hcan2.pTxMsg = &TxMessage;
+		  if(cntr!=-1)
+		  	  if(HAL_CAN_Transmit(&hcan2,5)!=HAL_OK)
+		  	  {
+		  		  Error_Handler();
+		  	  }
+
+
+	  }
+	  cntr = 0;
+ }
+ */
 #include <CAN_protocol.h>
 
 
@@ -26,9 +76,7 @@ int struct2ArrConverter(uint8_t *inpArr, int arrSize, uint8_t *outArr)
 //put here array, and get message array that is 8-byte CAN message to send and value of next step pointer
 int mesQueueProcedure(uint8_t *inpArr, int mesPointer, uint8_t *message, int arrLength)
 {
-//#ifdef INS
-//	module = 1;
-//#endif
+
 	int counter=0;
 	for(int i = mesPointer*8; i < (mesPointer+1)*8; i++)
 	{
